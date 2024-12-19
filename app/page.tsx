@@ -9,10 +9,13 @@ import { PlusCircle, MinusCircle, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import TransactionList from '@/components/TransactionList'
 import { formatTime } from "@/lib/dateUtils";
+import { InputGroup, FormControl, Dropdown, DropdownButton } from 'react-bootstrap';
 
 export default function Home() {
   const [transactions, setTransactions] = useState([
     { id: "1", type: "in", amount: 15000, description: "Salary", date: new Date() },
+    { id: "1", type: "in", amount: 15000, description: "Saalary", date: new Date() },
+    { id: "1", type: "in", amount: 15000, description: "Saaalary", date: new Date() },
     { id: "1", type: "in", amount: 1200, description: "Electricity", date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) },
     { id: "1", type: "out", amount: 500, description: "Water", date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000) },
 
@@ -51,6 +54,27 @@ export default function Home() {
     setNewTransaction({ type: "in", amount: "", description: "" });
   };
 
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const allSuggestions = transactions.map( transaction => transaction.description )
+  
+  const handleInputChange = (e: { target: { value: any; }; }) => {
+
+    const value = e.target.value;
+    console.log(allSuggestions)
+    console.log(value)
+    setNewTransaction({ ...newTransaction, description: value });
+
+    if (value.length > 0) {
+      const filteredSuggestions = allSuggestions.filter(suggestion =>
+        suggestion.toLowerCase().includes(value.toLowerCase())
+      );
+      setSuggestions(filteredSuggestions);
+      console.log(suggestions,'f')
+    } else {
+      setSuggestions([]);
+    }
+  }; 
+
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-2xl mx-auto space-y-6">
@@ -58,8 +82,8 @@ export default function Home() {
         <Card className="p-6">
           <h1 className="text-2xl font-bold mb-6">Cash Book</h1>
           
-          <form onSubmit={handleSubmit} className="space-y-4 mb-6">
-            <div className="flex gap-4">
+          <form onSubmit={handleSubmit} className="mb-6">
+            <div className="flex gap-4 my-4">
               <Button
                 type="button"
                 variant={newTransaction.type === "in" ? "default" : "outline"}
@@ -84,13 +108,52 @@ export default function Home() {
               type="number"
               value={newTransaction.amount}
               onChange={(e) => setNewTransaction({ ...newTransaction, amount: e.target.value })}
+              className="my-4"
             />
+
             <Input
               placeholder="Description"
+              type="text"
               value={newTransaction.description}
-              onChange={(e) => setNewTransaction({ ...newTransaction, description: e.target.value })}
+              onChange={handleInputChange}
+              className="form-control mt-4"
             />
-            <Button type="submit" className="w-full">Save Transaction</Button>
+            {suggestions.map( (suggestion,index) => <Button
+              key={index}
+              variant="destructive"
+              type="button"
+              onClick={() => {
+                setNewTransaction({ ...newTransaction, description : suggestion })
+                setSuggestions([])
+              }}
+              className="flex min-w-full bg-white text-black border m-0 p-0"
+            >
+              {suggestion}
+            </Button>)}
+            {/* <InputGroup className="mb-3">
+              <FormControl
+                placeholder="Description"
+                aria-label="Description"
+                aria-describedby="basic-addon2"
+                value={newTransaction.description}
+                onChange={handleInputChange}
+              />
+              {suggestions.length > 0 && (
+                <DropdownButton
+                  as={InputGroup.Append}
+                  variant="outline-secondary"
+                  title=""
+                  id="input-group-dropdown-2"
+                >
+                  {suggestions.map((suggestion, index) => (
+                    <Dropdown.Item key={index} onClick={() => setNewTransaction({ ...newTransaction, description: suggestion })}>
+                      {suggestion}
+                    </Dropdown.Item>
+                  ))}
+                </DropdownButton>
+              )}
+            </InputGroup> */}
+            <Button type="submit" className="w-full my-4">Save Transaction</Button>
           </form>
 
         </Card>
